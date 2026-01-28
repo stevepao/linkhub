@@ -64,5 +64,9 @@ try {
 } catch (\Throwable $e) {
     error_log('WebAuthn register start: ' . $e->getMessage());
     ob_end_clean();
-    json_response(['error' => 'Server error'], 500);
+    $msg = 'Server error';
+    if (\App\config()['dev_mode'] ?? false) {
+        $msg = $e->getMessage();
+    }
+    json_response(['error' => $msg], 500);
 }
