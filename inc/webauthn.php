@@ -2,6 +2,10 @@
 declare(strict_types=1);
 namespace App;
 
+// Load our WebAuthn wrapper classes (do not rely on Composer autoload for app code)
+require_once __DIR__ . '/webauthn_service.php';
+require_once __DIR__ . '/webauthn_lbuchs.php';
+
 use App\WebAuthn\WebAuthnServiceInterface;
 use App\WebAuthn\WebAuthnLbuchs;
 
