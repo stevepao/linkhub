@@ -4,6 +4,7 @@ ob_start();
 use function App\{pdo, require_user, webauthn_service, rate_limit_check, rate_limit_identifier, json_response};
 require __DIR__ . '/../../inc/db.php';
 require __DIR__ . '/../../inc/auth.php';
+require __DIR__ . '/../../inc/csrf.php';
 require __DIR__ . '/../../inc/helpers.php';
 require __DIR__ . '/../../inc/webauthn.php';
 require __DIR__ . '/../../inc/rate_limit.php';
