@@ -37,3 +37,15 @@ function json_response(array $payload, int $code = 200): void {
     echo json_encode($payload, JSON_UNESCAPED_SLASHES);
     exit;
 }
+
+/** True if links table has a description column (run migration to add it). */
+function links_has_description(): bool {
+    static $has = null;
+    if ($has === null) {
+        $stmt = \App\pdo()->query(
+            "SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'links' AND COLUMN_NAME = 'description'"
+        );
+        $has = (bool) $stmt->fetch();
+    }
+    return $has;
+}

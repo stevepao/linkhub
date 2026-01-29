@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-use function App\{pdo, e};
+use function App\{pdo, e, links_has_description};
 require __DIR__ . '/inc/db.php';
 require __DIR__ . '/inc/helpers.php';
 
@@ -38,7 +38,9 @@ if ($u !== null) {
         echo "User not found";
         exit;
     }
-    $links = pdo()->prepare("SELECT id, title, url, description, color_hex, icon_slug FROM links WHERE user_id = ? AND is_active = 1 ORDER BY position ASC, id ASC");
+    $hasDesc = links_has_description();
+    $linkCols = $hasDesc ? 'id, title, url, description, color_hex, icon_slug' : 'id, title, url, color_hex, icon_slug';
+    $links = pdo()->prepare("SELECT $linkCols FROM links WHERE user_id = ? AND is_active = 1 ORDER BY position ASC, id ASC");
     $links->execute([$user['id']]);
     $links = $links->fetchAll();
     include __DIR__ . '/inc/icons.php';
@@ -62,9 +64,9 @@ if ($u !== null) {
         <?php foreach ($links as $l): ?>
           <?php
             $href = '/index.php?go=' . (int)$l['id'];
-            $hasDesc = !empty(trim((string)($l['description'] ?? '')));
+            $showCard = $hasDesc && !empty(trim((string)($l['description'] ?? '')));
           ?>
-          <?php if ($hasDesc): ?>
+          <?php if ($showCard): ?>
             <a class="card" href="<?= e($href) ?>" rel="noopener">
               <h3><?= e($l['title']) ?></h3>
               <p><?= nl2br(e(trim($l['description']))) ?></p>

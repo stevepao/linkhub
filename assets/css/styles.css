@@ -59,8 +59,11 @@ button.danger { background: #b91c1c; }
 .table .actions .inline { display: inline-block; margin-right: 6px; }
 .link-list { list-style: none; padding: 0; margin: 0; }
 .link-item {
-  display: grid; grid-template-columns: 28px 1fr 1fr minmax(80px,1fr) 120px 160px auto auto;
+  display: grid; grid-template-columns: 28px 1fr 1fr 120px 160px auto auto;
   gap: 8px; align-items: center; padding: 8px; border-bottom: 1px dashed #ddd;
+}
+.link-list--with-desc .link-item {
+  grid-template-columns: 28px 1fr 1fr minmax(80px,1fr) 120px 160px auto auto;
 }
 .link-item .drag { cursor: grab; user-select: none; }
 .link-item .delete { background: #b91c1c; color: #fff; }
