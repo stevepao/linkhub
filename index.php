@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-use function App\{pdo, e, links_has_description};
+use function App\{pdo, e, links_has_description, is_valid_hex_color, link_contrast_text, link_darken, link_muted_rgba};
 require __DIR__ . '/inc/db.php';
 require __DIR__ . '/inc/helpers.php';
 
@@ -65,14 +65,17 @@ if ($u !== null) {
           <?php
             $href = '/index.php?go=' . (int)$l['id'];
             $showCard = $hasDesc && !empty(trim((string)($l['description'] ?? '')));
+            $hex = (is_valid_hex_color($l['color_hex'] ?? '') ? $l['color_hex'] : '#111827');
+            $btnStyle = '--button-bg:' . $hex . ';--button-text:' . link_contrast_text($hex) . ';--button-hover:' . link_darken($hex) . ';';
+            $cardStyle = '--card-bg:' . $hex . ';--border:' . link_darken($hex, 0.2) . ';color:' . link_contrast_text($hex) . ';--muted:' . link_muted_rgba($hex) . ';';
           ?>
           <?php if ($showCard): ?>
-            <a class="card" href="<?= e($href) ?>" rel="noopener">
+            <a class="card" href="<?= e($href) ?>" rel="noopener" style="<?= e($cardStyle) ?>">
               <h3><?= e($l['title']) ?></h3>
               <p><?= nl2br(e(trim($l['description']))) ?></p>
             </a>
           <?php else: ?>
-            <a class="button" href="<?= e($href) ?>" rel="noopener">
+            <a class="button" href="<?= e($href) ?>" rel="noopener" style="<?= e($btnStyle) ?>">
               <span class="icon">
                 <?php $svg = \App\render_icon_svg($l['icon_slug'] ?? 'link'); echo $svg ?: ''; ?>
               </span>
