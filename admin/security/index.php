@@ -142,11 +142,13 @@ $csrf = \App\csrf_token();
           <label>Enter code from app<br><input name="totp_code" inputmode="numeric" pattern="[0-9]{6}" required></label>
           <button name="verify_totp" value="1" type="submit">Verify &amp; Enable</button>
         </form>
-        <script src="/assets/js/qrcode.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
         <script>
           document.addEventListener('DOMContentLoaded', function() {
-            if (document.getElementById('qr') && typeof QRCode !== 'undefined') {
-              new QRCode(document.getElementById('qr'), { text: "<?= addslashes(htmlspecialchars($uri, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) ?>", width: 180, height: 180 });
+            var el = document.getElementById('qr');
+            var uri = <?= json_encode($uri, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+            if (el && uri && typeof QRCode !== 'undefined') {
+              new QRCode(el, { text: uri, width: 180, height: 180 });
             }
           });
         </script>
