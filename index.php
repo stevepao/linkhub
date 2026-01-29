@@ -153,7 +153,7 @@ $year = (int) date('Y');
         <a href="/terms">Terms</a>
         <a href="/contact">Contact</a>
       </nav>
-      <p class="footer-copy">© <?= $year ?> Hillwork, LLC</p>
+      <p class="footer-copy">© <?= $year ?> <a href="https://hillwork.us">Hillwork, LLC</a></p>
     </div>
   </footer>
 </body>
