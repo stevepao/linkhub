@@ -46,7 +46,7 @@ if ($u !== null) {
     include __DIR__ . '/inc/icons.php';
     ?><!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?= e($user['display_name']) ?> · Links</title><link rel="stylesheet" href="/assets/css/paos.css"></head>
-<body>
+<body class="theme-<?= e($user['theme']) ?>">
   <header class="container">
     <div class="profile">
       <?php if (!empty($user['avatar_path'])): ?>

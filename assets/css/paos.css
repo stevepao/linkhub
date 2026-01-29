@@ -30,6 +30,19 @@
   }
 }
 
+/* Profile theme overrides: force light or dark regardless of system preference */
+body.theme-light {
+  --bg: #ffffff; --text: #1a1a1a; --muted: #6b7280;
+  --border: #e5e7eb; --link: #0b57d0; --link-hover: #0849b3;
+  --card-bg: #ffffff; --button-bg: #111827; --button-text: #ffffff; --button-hover: #000000;
+}
+body.theme-dark {
+  --bg: #0b0b0c; --text: #f3f4f6; --muted: #a1a1aa;
+  --border: #232428; --card-bg: #111214;
+  --button-bg: #e5e7eb; --button-text: #111827; --button-hover: #ffffff;
+}
+/* theme-custom: no override, uses prefers-color-scheme */
+
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 html { min-width: 320px; }
