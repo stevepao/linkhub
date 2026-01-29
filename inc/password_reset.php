@@ -18,6 +18,11 @@ function password_reset_create(int $userId, int $expireMinutes = 30): string {
 
 /** @return array{user_id: int, id: int}|null */
 function password_reset_find_valid(string $rawToken): ?array {
+    // Strip any characters that aren't base64url (e.g. spaces/newlines from email line wrapping)
+    $rawToken = preg_replace('/[^A-Za-z0-9_-]/', '', trim($rawToken));
+    if ($rawToken === '') {
+        return null;
+    }
     $raw = base64_decode(str_replace(['-', '_'], ['+', '/'], $rawToken) . str_repeat('=', (4 - strlen($rawToken) % 4) % 4), true);
     if ($raw === false || strlen($raw) !== 32) {
         return null;

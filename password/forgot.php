@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $appName = config()['app_name'] ?? 'LinkHub';
                 $bodyText = "You requested a password reset. Click the link below (valid 30 minutes):\n\n" . $resetUrl . "\n\nIf you did not request this, ignore this email.";
                 $bodyHtml = '<p>You requested a password reset. Click the link below (valid 30 minutes):</p><p><a href="' . e($resetUrl) . '">Reset password</a></p><p>If you did not request this, ignore this email.</p>';
-                $sent = send_mail($u['email'], 'Password reset – ' . $appName, $bodyText, $bodyHtml);
+                $sent = send_mail($u['email'], 'Password reset - ' . $appName, $bodyText, $bodyHtml);
                 if (!$sent && (config()['dev_mode'] ?? false)) {
                     error_log('[LinkHub password reset] ' . $resetUrl);
                 }

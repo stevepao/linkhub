@@ -33,6 +33,8 @@ function send_mail(string $to, string $subject, string $bodyText, ?string $bodyH
 
     try {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->CharSet = \PHPMailer\PHPMailer\PHPMailer::CHARSET_UTF8;
+        $mail->Encoding = 'base64';
         $mail->isSMTP();
         $mail->Host = $smtp['host'];
         $mail->Port = (int)($smtp['port'] ?? 587);
