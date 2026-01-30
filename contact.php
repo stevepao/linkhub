@@ -11,7 +11,7 @@ $year = (int) date('Y');
   <main class="container">
     <div class="stack">
       <h1>Contact</h1>
-      <p>For support or feedback, contact <a href="/@spao">Stephen Pao</a>.</p>
+      <p>For support or feedback, contact the <a href="/@administrator">administrator</a>.</p>
       <p><a href="/">Home</a></p>
     </div>
   </main>
