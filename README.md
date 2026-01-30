@@ -1,4 +1,4 @@
-# LinkHub (Shared‑Hosting Friendly Link‑in‑Bio)
+# LinkHill (Shared‑Hosting Friendly Link‑in‑Bio)
 
 Multi‑user, MySQL‑backed Linktree‑style app for shared LAMP hosting (e.g., IONOS). Public profile URLs use `/@username`. Admins manage users; users manage their own links with drag‑to‑reorder, color picker, and local SVG icon presets.
 
