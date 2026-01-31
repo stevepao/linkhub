@@ -62,18 +62,20 @@ $icons = \App\icon_list();
     <ul id="linkList" class="link-list<?= $hasDesc ? ' link-list--with-desc' : '' ?>" data-csrf="<?= e($csrf) ?>">
       <?php foreach ($links as $l): ?>
         <li class="link-item" data-id="<?= (int)$l['id'] ?>">
-          <span class="drag">⋮⋮</span>
-          <input class="title" type="text" value="<?= e($l['title']) ?>" maxlength="80">
-          <input class="url" type="url" value="<?= e($l['url']) ?>">
-          <?php if ($hasDesc): ?><input class="description" type="text" placeholder="Optional blurb (shows as card)" value="<?= e($l['description'] ?? '') ?>" maxlength="500"><?php endif; ?>
-          <input class="color" type="color" value="<?= e($l['color_hex']) ?>">
-          <select class="icon">
-            <?php foreach ($icons as $slug => $path): ?>
-              <option value="<?= e($slug) ?>" <?= $slug === ($l['icon_slug'] ?? 'link') ? 'selected' : '' ?>><?= e($slug) ?></option>
-            <?php endforeach; ?>
-          </select>
-          <button class="save">Save</button>
-          <button class="delete danger">Delete</button>
+          <div class="link-item__row">
+            <span class="drag" title="Drag to reorder">⋮⋮</span>
+            <div class="link-item__fields">
+              <label class="link-item__label">Title<br><input class="title" type="text" value="<?= e($l['title']) ?>" maxlength="80" placeholder="Link title"></label>
+              <label class="link-item__label">URL<br><input class="url" type="url" value="<?= e($l['url']) ?>" placeholder="https://..."></label>
+              <?php if ($hasDesc): ?><label class="link-item__label">Description (optional)<br><input class="description" type="text" placeholder="Optional blurb (shows as card)" value="<?= e($l['description'] ?? '') ?>" maxlength="500"></label><?php endif; ?>
+              <div class="link-item__meta">
+                <label class="link-item__meta-label">Color <input class="color" type="color" value="<?= e($l['color_hex']) ?>" title="Button color"></label>
+                <label class="link-item__meta-label">Icon <select class="icon"><?php foreach ($icons as $slug => $path): ?><option value="<?= e($slug) ?>" <?= $slug === ($l['icon_slug'] ?? 'link') ? 'selected' : '' ?>><?= e($slug) ?></option><?php endforeach; ?></select></label>
+                <button type="button" class="save">Save</button>
+                <button type="button" class="delete danger">Delete</button>
+              </div>
+            </div>
+          </div>
         </li>
       <?php endforeach; ?>
     </ul>
