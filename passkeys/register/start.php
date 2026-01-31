@@ -35,10 +35,14 @@ try {
     $stmt = pdo()->prepare("SELECT webauthn_user_handle, email, display_name FROM users WHERE id = ?");
     $stmt->execute([$user['id']]);
     $u = $stmt->fetch();
-    if (!$u || $u['webauthn_user_handle'] === null) {
-        json_response(['error' => 'User handle not set'], 400);
+    if (!$u) {
+        json_response(['error' => 'User not found'], 400);
     }
     $userHandle = $u['webauthn_user_handle'];
+    if ($userHandle === null) {
+        $userHandle = random_bytes(32);
+        pdo()->prepare("UPDATE users SET webauthn_user_handle = ? WHERE id = ?")->execute([$userHandle, $user['id']]);
+    }
     $credIds = [];
     $rows = pdo()->prepare("SELECT credential_id FROM webauthn_credentials WHERE user_id = ?");
     $rows->execute([$user['id']]);

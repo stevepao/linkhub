@@ -6,7 +6,7 @@
  * Copyright (c) 2026 Hillwork, LLC
  */
 declare(strict_types=1);
-use function App\{pdo, e, require_admin, config, base_url, send_mail, users_have_email_verified};
+use function App\{pdo, e, require_admin, config, base_url, send_mail, users_have_email_verified, users_have_webauthn_handle};
 require __DIR__ . '/../inc/db.php';
 require __DIR__ . '/../inc/auth.php';
 require __DIR__ . '/../inc/csrf.php';
@@ -29,9 +29,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = 'Missing or invalid fields.';
         } else {
             $hash = password_hash($pwd, PASSWORD_DEFAULT, ['cost'=>\App\config()['password_cost']]);
-            $ins = pdo()->prepare("INSERT INTO users (email, username, display_name, password_hash, role) VALUES (?,?,?,?,?)");
+            $cols = "email, username, display_name, password_hash, role";
+            $placeholders = "?, ?, ?, ?, ?";
+            $args = [$email, $username, $display, $hash, $role];
+            if (users_have_webauthn_handle()) {
+                $cols .= ", webauthn_user_handle";
+                $placeholders .= ", ?";
+                $args[] = random_bytes(32);
+            }
+            $ins = pdo()->prepare("INSERT INTO users ({$cols}) VALUES ({$placeholders})");
             try {
-                $ins->execute([$email, $username, $display, $hash, $role]);
+                $ins->execute($args);
                 $userId = (int) pdo()->lastInsertId();
                 if (users_have_email_verified()) {
                     $tokenForLink = \App\email_verification_create($userId, 60);
