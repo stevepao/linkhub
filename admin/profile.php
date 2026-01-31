@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     \App\csrf_verify();
     $display = trim((string)($_POST['display_name'] ?? ''));
     $bio     = trim((string)($_POST['bio'] ?? ''));
+    $customFooter = trim((string)($_POST['custom_footer'] ?? ''));
     $theme   = in_array($_POST['theme'] ?? 'light', ['light','dark','custom'], true) ? $_POST['theme'] : 'light';
     // Handle avatar upload optionally
     $avatarPath = null;
@@ -43,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if ($display && !$msg) {
-        $sql = "UPDATE users SET display_name=?, bio=?, theme=?, updated_at=NOW()";
-        $args = [$display, $bio, $theme];
+        $sql = "UPDATE users SET display_name=?, bio=?, custom_footer=?, theme=?, updated_at=NOW()";
+        $args = [$display, $bio, $customFooter, $theme];
         if ($avatarPath) { $sql .= ", avatar_path=?"; $args[] = $avatarPath; }
         $sql .= " WHERE id=?";
         $args[] = $me['id'];
@@ -55,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $msg = 'Display name required.';
     }
 }
-$stmt = pdo()->prepare("SELECT email,username,display_name,bio,theme,avatar_path FROM users WHERE id=?");
+$stmt = pdo()->prepare("SELECT email,username,display_name,bio,custom_footer,theme,avatar_path FROM users WHERE id=?");
 $stmt->execute([$me['id']]);
 $row = $stmt->fetch();
 ?><!doctype html>
@@ -80,6 +81,7 @@ $row = $stmt->fetch();
       <label>Username (public URL)<br><input type="text" value="@<?= e($row['username']) ?>" disabled></label>
     </div>
     <label>Bio<br><textarea name="bio" rows="4"><?= e($row['bio']) ?></textarea></label>
+    <label>Custom footer (optional)<br><textarea name="custom_footer" rows="3" placeholder="Shown centered below your links on your public page"><?= e($row['custom_footer'] ?? '') ?></textarea></label>
     <label>Theme<br>
       <select name="theme">
         <option value="light" <?= $row['theme']==='light'?'selected':'' ?>>Light</option>

@@ -48,8 +48,9 @@ a { color: inherit; }
 .avatar.sm { width: 64px; height: 64px; }
 .name { font-size: 1.75rem; margin-top: 8px; }
 .bio { color: var(--muted); white-space: pre-wrap; }
-.links { display: grid; gap: 12px; margin-top: 24px; }
+.links { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 24px; }
 .link-btn {
+  width: 75%;
   display: flex; align-items: center; gap: 10px;
   padding: 14px 16px; border-radius: 12px; text-decoration: none;
   background: var(--btn-color, #111827); color: var(--btn-fg);
@@ -75,6 +76,8 @@ button {
 }
 button.danger { background: #b91c1c; }
 .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.add-form__row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.add-form__row .grid { flex: 1; min-width: 200px; }
 .table { width: 100%; border-collapse: collapse; }
 .table th, .table td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
 .table .actions .inline { display: inline-block; margin-right: 6px; }

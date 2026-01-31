@@ -36,7 +36,7 @@ if ($go !== null) {
 }
 
 if ($u !== null) {
-    $stmt = pdo()->prepare("SELECT id, display_name, username, bio, theme, avatar_path FROM users WHERE username = ?");
+    $stmt = pdo()->prepare("SELECT id, display_name, username, bio, custom_footer, theme, avatar_path FROM users WHERE username = ?");
     $stmt->execute([$u]);
     $user = $stmt->fetch();
     if (!$user) {
@@ -90,6 +90,9 @@ if ($u !== null) {
           <?php endif; ?>
         <?php endforeach; ?>
       </nav>
+      <?php if (!empty(trim((string)($user['custom_footer'] ?? '')))): ?>
+      <footer class="profile-footer"><?= nl2br(e(trim($user['custom_footer']))) ?></footer>
+      <?php endif; ?>
     </div>
   </main>
 </body></html><?php

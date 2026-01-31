@@ -21,6 +21,7 @@ CREATE TABLE users (
   avatar_path            VARCHAR(255) NULL,
   theme                  ENUM('light','dark','custom') NOT NULL DEFAULT 'light',
   bio                    TEXT NULL,
+  custom_footer          TEXT NULL,
   created_at             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   email_verified_at      DATETIME NULL,
   updated_at             DATETIME NULL ON UPDATE CURRENT_TIMESTAMP

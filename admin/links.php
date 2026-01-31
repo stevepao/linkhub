@@ -44,17 +44,19 @@ $icons = \App\icon_list();
         <label>URL<br><input type="url" name="url" placeholder="https://..." required></label>
       </div>
       <?php if ($hasDesc): ?><label>Description (optional; if set, link shows as a card with blurb on your page)<br><input type="text" name="description" placeholder="Optional blurb" maxlength="500"></label><?php endif; ?>
-      <div class="grid">
-        <label>Color<br><input type="color" name="color_hex" value="#111827"></label>
-        <label>Icon<br>
-          <select name="icon_slug">
-            <?php foreach ($icons as $slug => $path): ?>
-              <option value="<?= e($slug) ?>"><?= e($slug) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </label>
+      <div class="add-form__row">
+        <div class="grid">
+          <label>Color<br><input type="color" name="color_hex" value="#111827"></label>
+          <label>Icon<br>
+            <select name="icon_slug">
+              <?php foreach ($icons as $slug => $path): ?>
+                <option value="<?= e($slug) ?>"><?= e($slug) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+        </div>
+        <button type="submit">Add</button>
       </div>
-      <button type="submit">Add</button>
     </form>
   </section>
   <section class="card">
