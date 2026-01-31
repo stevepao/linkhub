@@ -11,6 +11,7 @@ require __DIR__ . '/../inc/db.php';
 require __DIR__ . '/../inc/auth.php';
 require __DIR__ . '/../inc/csrf.php';
 require __DIR__ . '/../inc/helpers.php';
+require __DIR__ . '/../inc/sites_xml.php';
 
 $me = \App\require_admin();
 $msg = '';
@@ -50,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id > 0 && $id !== (int)$me['id']) {
             $del = pdo()->prepare("DELETE FROM users WHERE id = ?");
             $del->execute([$id]);
+            \App\sites_xml_rebuild();
             $msg = 'User deleted.';
         } else {
             $msg = 'Cannot delete self or invalid ID.';

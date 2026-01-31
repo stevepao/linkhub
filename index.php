@@ -51,8 +51,22 @@ if ($u !== null) {
     $links->execute([$user['id']]);
     $links = $links->fetchAll();
     include __DIR__ . '/inc/icons.php';
+    $profileCanonical = rtrim(base_url(), '/') . '/@' . $user['username'];
+    $profileMetaDesc = e($user['display_name']) . ' — link in bio, links and profile. View all links for ' . e($user['display_name']) . '.';
     ?><!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?= e($user['display_name']) ?> · Links</title><link rel="stylesheet" href="/assets/css/paos.css"></head>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title><?= e($user['display_name']) ?> · Links | Link in Bio</title>
+<meta name="description" content="<?= $profileMetaDesc ?>">
+<link rel="canonical" href="<?= e($profileCanonical) ?>">
+<meta property="og:type" content="profile">
+<meta property="og:url" content="<?= e($profileCanonical) ?>">
+<meta property="og:title" content="<?= e($user['display_name']) ?> · Links">
+<meta property="og:description" content="<?= $profileMetaDesc ?>">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="<?= e($user['display_name']) ?> · Links">
+<meta name="twitter:description" content="<?= $profileMetaDesc ?>">
+<link rel="stylesheet" href="/assets/css/linkhill.css"></head>
 <body class="theme-<?= e($user['theme']) ?>">
   <header class="container">
     <div class="profile">
@@ -106,24 +120,26 @@ if ($u !== null) {
 // Homepage: informational only; no auth UI
 $appName = config()['app_name'] ?? 'Hillwork';
 $canonical = rtrim(base_url(), '/');
-$metaDesc = 'Create a clean, customizable link‑in‑bio page—free and open. No paywalls. Own your data.';
+$metaDesc = 'Free Linktree alternative: create a clean link-in-bio page in minutes. No paywalls, no lock-in. Best free link in bio tool for Instagram, TikTok, and more.';
+$metaKeywords = 'Linktree alternative, link in bio, link in bio free, bio link, Instagram link, TikTok link, link hub, link page';
 $year = (int) date('Y');
 ?><!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= e($appName) ?> — All your links, one simple page</title>
+  <title><?= e($appName) ?> — Free Linktree Alternative | Link in Bio</title>
   <meta name="description" content="<?= e($metaDesc) ?>">
+  <meta name="keywords" content="<?= e($metaKeywords) ?>">
   <link rel="canonical" href="<?= e($canonical) ?>/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="<?= e($canonical) ?>/">
-  <meta property="og:title" content="<?= e($appName) ?> — All your links, one simple page">
+  <meta property="og:title" content="<?= e($appName) ?> — Free Linktree Alternative | Link in Bio">
   <meta property="og:description" content="<?= e($metaDesc) ?>">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="<?= e($appName) ?> — All your links, one simple page">
+  <meta name="twitter:title" content="<?= e($appName) ?> — Free Linktree Alternative | Link in Bio">
   <meta name="twitter:description" content="<?= e($metaDesc) ?>">
-  <link rel="stylesheet" href="/assets/css/paos.css">
+  <link rel="stylesheet" href="/assets/css/linkhill.css">
 </head>
 <body class="theme-light home-page">
   <header class="container hero">

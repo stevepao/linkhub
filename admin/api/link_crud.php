@@ -12,6 +12,7 @@ require __DIR__ . '/../../inc/auth.php';
 require __DIR__ . '/../../inc/csrf.php';
 require __DIR__ . '/../../inc/helpers.php';
 require __DIR__ . '/../../inc/icons.php';
+require __DIR__ . '/../../inc/sites_xml.php';
 
 $me = \App\require_user();
 \App\csrf_verify();
@@ -46,6 +47,7 @@ if ($action === 'create') {
         }
     }
     $id = (int)pdo()->lastInsertId();
+    if ($entryType === 'link') \App\sites_xml_rebuild();
     json_response(['id'=>$id, 'position'=>$pos]);
 } elseif ($action === 'update') {
     $id    = (int)($_POST['id'] ?? 0);
@@ -79,12 +81,14 @@ if ($action === 'create') {
             $up->execute([$title, $url, $color, $icon, $id, $me['id']]);
         }
     }
+    if ($entryType === 'link') \App\sites_xml_rebuild();
     json_response(['ok'=>true]);
 } elseif ($action === 'delete') {
     $id = (int)($_POST['id'] ?? 0);
     if ($id <= 0) json_response(['error'=>'Invalid id'], 422);
     $own = pdo()->prepare("DELETE FROM links WHERE id=? AND user_id=?");
     $own->execute([$id, $me['id']]);
+    \App\sites_xml_rebuild();
     json_response(['ok'=>true]);
 } else {
     json_response(['error'=>'Unknown action'], 400);

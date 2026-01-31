@@ -6,13 +6,29 @@
  * Copyright (c) 2026 Hillwork, LLC
  */
 declare(strict_types=1);
-use function App\{config, e};
+use function App\{config, e, base_url};
 require __DIR__ . '/inc/db.php';
 require __DIR__ . '/inc/helpers.php';
 $appName = e(config()['app_name'] ?? 'Hillwork');
+$canonical = rtrim(base_url(), '/') . '/contact';
+$metaDesc = 'Contact ' . $appName . ' — support and feedback for our free Linktree alternative and link-in-bio tool.';
+$metaKeywords = 'contact ' . $appName . ', Linktree alternative support, link in bio help';
 $year = (int) date('Y');
 ?><!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Contact · <?= $appName ?></title><link rel="stylesheet" href="/assets/css/paos.css"></head>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact · <?= $appName ?> — Free Link in Bio</title>
+<meta name="description" content="<?= e($metaDesc) ?>">
+<meta name="keywords" content="<?= e($metaKeywords) ?>">
+<link rel="canonical" href="<?= e($canonical) ?>">
+<meta property="og:type" content="website">
+<meta property="og:url" content="<?= e($canonical) ?>">
+<meta property="og:title" content="Contact · <?= $appName ?>">
+<meta property="og:description" content="<?= e($metaDesc) ?>">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Contact · <?= $appName ?>">
+<meta name="twitter:description" content="<?= e($metaDesc) ?>">
+<link rel="stylesheet" href="/assets/css/linkhill.css"></head>
 <body class="theme-light">
   <main class="container">
     <div class="stack">

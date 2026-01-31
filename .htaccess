@@ -35,6 +35,11 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^contact$ contact.php [L]
 
+# Sitemap (sites.xml)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
 # Pretty URL for public profiles: /@username (and %40username when @ is encoded)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
