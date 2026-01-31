@@ -146,7 +146,7 @@ a:focus-visible {
 }
 .button .icon { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
 .button .icon svg { width: 20px; height: 20px; fill: currentColor; }
-.button .title { flex: 1; text-align: left; }
+.button .title { flex-shrink: 0; text-align: center; }
 
 /* List of links */
 .link-list { display: grid; grid-template-columns: 1fr; gap: var(--s-4); list-style: none; padding: 0; margin: 0; }

@@ -6,12 +6,14 @@
  * Copyright (c) 2026 Hillwork, LLC
  */
 declare(strict_types=1);
-use function App\{pdo, e, require_admin};
+use function App\{pdo, e, require_admin, config, base_url, send_mail, users_have_email_verified};
 require __DIR__ . '/../inc/db.php';
 require __DIR__ . '/../inc/auth.php';
 require __DIR__ . '/../inc/csrf.php';
 require __DIR__ . '/../inc/helpers.php';
+require __DIR__ . '/../inc/mail.php';
 require __DIR__ . '/../inc/sites_xml.php';
+require_once __DIR__ . '/../inc/email_verification.php';
 
 $me = \App\require_admin();
 $msg = '';
@@ -30,7 +32,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ins = pdo()->prepare("INSERT INTO users (email, username, display_name, password_hash, role) VALUES (?,?,?,?,?)");
             try {
                 $ins->execute([$email, $username, $display, $hash, $role]);
-                $msg = 'User created.';
+                $userId = (int) pdo()->lastInsertId();
+                if (users_have_email_verified()) {
+                    $tokenForLink = \App\email_verification_create($userId, 60);
+                    $origin = rtrim(base_url(), '/');
+                    $verifyUrl = $origin . '/verify-email.php?token=' . $tokenForLink;
+                    $appName = config()['app_name'] ?? 'Hillwork';
+                    $bodyText = "Verify your email to activate your {$appName} account. Click the link below (valid 1 hour):\n\n" . $verifyUrl . "\n\nIf you did not create an account, ignore this email.";
+                    $bodyHtml = '<p>Verify your email to activate your ' . e($appName) . ' account. Click the link below (valid 1 hour):</p><p><a href="' . e($verifyUrl) . '">Verify email</a></p><p>If you did not create an account, ignore this email.</p>';
+                    $sent = send_mail($email, 'Verify your email - ' . $appName, $bodyText, $bodyHtml);
+                    $msg = $sent ? 'User created. Verification email sent to ' . e($email) . '.' : 'User created. Verification email could not be sent—check SMTP config.';
+                } else {
+                    $msg = 'User created.';
+                }
             } catch (\PDOException $e) {
                 $msg = 'Error creating user: ' . e($e->getMessage());
             }

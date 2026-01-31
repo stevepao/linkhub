@@ -6,12 +6,15 @@
  * Copyright (c) 2026 Hillwork, LLC
  */
 declare(strict_types=1);
-use function App\{config, e, webauthn_available};
+use function App\{config, e, pdo, base_url, send_mail, webauthn_available, users_have_email_verified, rate_limit_check, rate_limit_identifier_with_email};
 require __DIR__ . '/../inc/db.php';
 require __DIR__ . '/../inc/auth.php';
 require __DIR__ . '/../inc/csrf.php';
 require __DIR__ . '/../inc/helpers.php';
+require __DIR__ . '/../inc/mail.php';
+require __DIR__ . '/../inc/rate_limit.php';
 require __DIR__ . '/../inc/webauthn.php';
+require_once __DIR__ . '/../inc/email_verification.php';
 \App\session_boot();
 $passkeys_available = webauthn_available();
 
@@ -27,7 +30,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($res === 'mfa') {
             // fall through to TOTP form
         } elseif ($res === 'unverified') {
-            $err = 'Please verify your email before signing in. Check your inbox for the verification link.';
+            $email = trim((string) $_POST['email']);
+            if (users_have_email_verified() && $email !== '') {
+                $stmt = pdo()->prepare("SELECT id FROM users WHERE email = ? AND email_verified_at IS NULL");
+                $stmt->execute([$email]);
+                $row = $stmt->fetch();
+                if ($row && rate_limit_check('verification_resend', rate_limit_identifier_with_email($email), 3, 3600)) {
+                    $tokenForLink = \App\email_verification_create((int) $row['id'], 60);
+                    $origin = rtrim(base_url(), '/');
+                    $verifyUrl = $origin . '/verify-email.php?token=' . $tokenForLink;
+                    $appName = config()['app_name'] ?? 'Hillwork';
+                    $bodyText = "Verify your email to activate your {$appName} account. Click the link below (valid 1 hour):\n\n" . $verifyUrl . "\n\nIf you did not request this, ignore this email.";
+                    $bodyHtml = '<p>Verify your email to activate your ' . e($appName) . ' account. Click the link below (valid 1 hour):</p><p><a href="' . e($verifyUrl) . '">Verify email</a></p><p>If you did not request this, ignore this email.</p>';
+                    send_mail($email, 'Verify your email - ' . $appName, $bodyText, $bodyHtml);
+                    $err = 'Please verify your email before signing in. We\'ve sent a new verification link to your email address.';
+                } else {
+                    $err = 'Please verify your email before signing in. Check your inbox for the verification link. You can request another link in about an hour.';
+                }
+            } else {
+                $err = 'Please verify your email before signing in. Check your inbox for the verification link.';
+            }
         } else {
             $err = 'Invalid credentials.';
             sleep(1);
