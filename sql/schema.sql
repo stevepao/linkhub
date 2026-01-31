@@ -30,8 +30,9 @@ CREATE TABLE users (
 CREATE TABLE links (
   id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id     INT UNSIGNED NOT NULL,
+  entry_type  ENUM('link','heading') NOT NULL DEFAULT 'link',
   title       VARCHAR(80) NOT NULL,
-  url         VARCHAR(2000) NOT NULL,
+  url         VARCHAR(2000) NULL,
   description TEXT NULL,
   color_hex   CHAR(7) NOT NULL DEFAULT '#111827',
   icon_slug   VARCHAR(40) NULL,

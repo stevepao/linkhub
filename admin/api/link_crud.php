@@ -18,47 +18,66 @@ $me = \App\require_user();
 
 $action = $_POST['action'] ?? '';
 if ($action === 'create') {
+    $entryType = ($_POST['entry_type'] ?? 'link') === 'heading' ? 'heading' : 'link';
     $title = trim((string)($_POST['title'] ?? ''));
-    $url   = sanitize_url((string)($_POST['url'] ?? ''));
-    $desc  = trim((string)($_POST['description'] ?? ''));
-    $color = (string)($_POST['color_hex'] ?? '#111827');
-    $icon  = (string)($_POST['icon_slug'] ?? 'link');
-    if ($title === '' || !$url || !is_valid_hex_color($color)) {
-        json_response(['error'=>'Invalid input'], 422);
+    if ($title === '') {
+        json_response(['error'=>'Title required'], 422);
     }
-    $icons = \App\icon_list();
-    if (!isset($icons[$icon])) $icon = 'link';
     $pos = (int)pdo()->query("SELECT COALESCE(MAX(position),-1)+1 AS p FROM links WHERE user_id=".(int)$me['id'])->fetch()['p'];
-    if (links_has_description()) {
-        $ins = pdo()->prepare("INSERT INTO links (user_id, title, url, description, color_hex, icon_slug, position) VALUES (?,?,?,?,?,?,?)");
-        $ins->execute([$me['id'], $title, $url, $desc ?: null, $color, $icon, $pos]);
+    if ($entryType === 'heading') {
+        $ins = pdo()->prepare("INSERT INTO links (user_id, entry_type, title, url, position) VALUES (?, 'heading', ?, NULL, ?)");
+        $ins->execute([$me['id'], $title, $pos]);
     } else {
-        $ins = pdo()->prepare("INSERT INTO links (user_id, title, url, color_hex, icon_slug, position) VALUES (?,?,?,?,?,?)");
-        $ins->execute([$me['id'], $title, $url, $color, $icon, $pos]);
+        $url   = sanitize_url((string)($_POST['url'] ?? ''));
+        $desc  = trim((string)($_POST['description'] ?? ''));
+        $color = (string)($_POST['color_hex'] ?? '#111827');
+        $icon  = (string)($_POST['icon_slug'] ?? 'link');
+        if (!$url || !is_valid_hex_color($color)) {
+            json_response(['error'=>'Invalid input'], 422);
+        }
+        $icons = \App\icon_list();
+        if (!isset($icons[$icon])) $icon = 'link';
+        if (links_has_description()) {
+            $ins = pdo()->prepare("INSERT INTO links (user_id, entry_type, title, url, description, color_hex, icon_slug, position) VALUES (?, 'link', ?, ?, ?, ?, ?, ?)");
+            $ins->execute([$me['id'], $title, $url, $desc ?: null, $color, $icon, $pos]);
+        } else {
+            $ins = pdo()->prepare("INSERT INTO links (user_id, entry_type, title, url, color_hex, icon_slug, position) VALUES (?, 'link', ?, ?, ?, ?, ?)");
+            $ins->execute([$me['id'], $title, $url, $color, $icon, $pos]);
+        }
     }
     $id = (int)pdo()->lastInsertId();
     json_response(['id'=>$id, 'position'=>$pos]);
 } elseif ($action === 'update') {
     $id    = (int)($_POST['id'] ?? 0);
     $title = trim((string)($_POST['title'] ?? ''));
-    $url   = sanitize_url((string)($_POST['url'] ?? ''));
-    $desc  = trim((string)($_POST['description'] ?? ''));
-    $color = (string)($_POST['color_hex'] ?? '#111827');
-    $icon  = (string)($_POST['icon_slug'] ?? 'link');
-    if ($id <= 0 || $title === '' || !$url || !is_valid_hex_color($color)) {
+    if ($id <= 0 || $title === '') {
         json_response(['error'=>'Invalid input'], 422);
     }
-    $own = pdo()->prepare("SELECT id FROM links WHERE id=? AND user_id=?");
+    $own = pdo()->prepare("SELECT id, entry_type FROM links WHERE id=? AND user_id=?");
     $own->execute([$id, $me['id']]);
-    if (!$own->fetch()) json_response(['error'=>'Not found or no permission'], 404);
-    $icons = \App\icon_list();
-    if (!isset($icons[$icon])) $icon = 'link';
-    if (links_has_description()) {
-        $up = pdo()->prepare("UPDATE links SET title=?, url=?, description=?, color_hex=?, icon_slug=?, updated_at=NOW() WHERE id=? AND user_id=?");
-        $up->execute([$title, $url, $desc ?: null, $color, $icon, $id, $me['id']]);
+    $row = $own->fetch();
+    if (!$row) json_response(['error'=>'Not found or no permission'], 404);
+    $entryType = $row['entry_type'];
+    if ($entryType === 'heading') {
+        $up = pdo()->prepare("UPDATE links SET title=?, updated_at=NOW() WHERE id=? AND user_id=?");
+        $up->execute([$title, $id, $me['id']]);
     } else {
-        $up = pdo()->prepare("UPDATE links SET title=?, url=?, color_hex=?, icon_slug=?, updated_at=NOW() WHERE id=? AND user_id=?");
-        $up->execute([$title, $url, $color, $icon, $id, $me['id']]);
+        $url   = sanitize_url((string)($_POST['url'] ?? ''));
+        $desc  = trim((string)($_POST['description'] ?? ''));
+        $color = (string)($_POST['color_hex'] ?? '#111827');
+        $icon  = (string)($_POST['icon_slug'] ?? 'link');
+        if (!$url || !is_valid_hex_color($color)) {
+            json_response(['error'=>'Invalid input'], 422);
+        }
+        $icons = \App\icon_list();
+        if (!isset($icons[$icon])) $icon = 'link';
+        if (links_has_description()) {
+            $up = pdo()->prepare("UPDATE links SET title=?, url=?, description=?, color_hex=?, icon_slug=?, updated_at=NOW() WHERE id=? AND user_id=?");
+            $up->execute([$title, $url, $desc ?: null, $color, $icon, $id, $me['id']]);
+        } else {
+            $up = pdo()->prepare("UPDATE links SET title=?, url=?, color_hex=?, icon_slug=?, updated_at=NOW() WHERE id=? AND user_id=?");
+            $up->execute([$title, $url, $color, $icon, $id, $me['id']]);
+        }
     }
     json_response(['ok'=>true]);
 } elseif ($action === 'delete') {

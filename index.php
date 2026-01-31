@@ -16,9 +16,10 @@ $go = $_GET['go'] ?? null;
 if ($go !== null) {
     $id = (int)$go;
     if ($id > 0) {
-        $stmt = pdo()->prepare("SELECT id, url FROM links WHERE id = ? AND is_active = 1");
+        $stmt = pdo()->prepare("SELECT id, url, entry_type FROM links WHERE id = ? AND is_active = 1");
         $stmt->execute([$id]);
-        if ($row = $stmt->fetch()) {
+        $row = $stmt->fetch();
+        if ($row && ($row['entry_type'] ?? 'link') === 'link' && !empty($row['url'])) {
             // Minimal analytics
             $ip = $_SERVER['REMOTE_ADDR'] ?? '';
             $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
@@ -45,7 +46,7 @@ if ($u !== null) {
         exit;
     }
     $hasDesc = links_has_description();
-    $linkCols = $hasDesc ? 'id, title, url, description, color_hex, icon_slug' : 'id, title, url, color_hex, icon_slug';
+    $linkCols = $hasDesc ? 'id, entry_type, title, url, description, color_hex, icon_slug' : 'id, entry_type, title, url, color_hex, icon_slug';
     $links = pdo()->prepare("SELECT $linkCols FROM links WHERE user_id = ? AND is_active = 1 ORDER BY position ASC, id ASC");
     $links->execute([$user['id']]);
     $links = $links->fetchAll();
@@ -68,6 +69,9 @@ if ($u !== null) {
     <div class="stack">
       <nav class="link-list">
         <?php foreach ($links as $l): ?>
+          <?php if (($l['entry_type'] ?? 'link') === 'heading'): ?>
+            <h2 class="entry-heading"><?= e($l['title']) ?></h2>
+          <?php else: ?>
           <?php
             $href = '/index.php?go=' . (int)$l['id'];
             $showCard = $hasDesc && !empty(trim((string)($l['description'] ?? '')));
@@ -87,6 +91,7 @@ if ($u !== null) {
               </span>
               <span class="title"><?= e($l['title']) ?></span>
             </a>
+          <?php endif; ?>
           <?php endif; ?>
         <?php endforeach; ?>
       </nav>

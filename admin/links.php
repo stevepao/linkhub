@@ -16,7 +16,7 @@ require __DIR__ . '/../inc/icons.php';
 $me = \App\require_user();
 $csrf = \App\csrf_token();
 $hasDesc = links_has_description();
-$cols = $hasDesc ? 'id, title, url, description, color_hex, icon_slug, position, is_active' : 'id, title, url, color_hex, icon_slug, position, is_active';
+$cols = $hasDesc ? 'id, entry_type, title, url, description, color_hex, icon_slug, position, is_active' : 'id, entry_type, title, url, color_hex, icon_slug, position, is_active';
 $links = pdo()->prepare("SELECT $cols FROM links WHERE user_id=? ORDER BY position ASC, id ASC");
 $links->execute([$me['id']]);
 $links = $links->fetchAll();
@@ -60,24 +60,44 @@ $icons = \App\icon_list();
     </form>
   </section>
   <section class="card">
-    <h2>Your links</h2>
+    <h2>Add heading</h2>
+    <form id="addHeadingForm">
+      <input type="hidden" name="_token" value="<?= e($csrf) ?>">
+      <input type="hidden" name="entry_type" value="heading">
+      <div class="add-form__row">
+        <label class="add-heading__label">Heading text<br><input type="text" name="title" placeholder="Section title (e.g. Social links)" maxlength="80" required></label>
+        <button type="submit">Add heading</button>
+      </div>
+    </form>
+  </section>
+  <section class="card">
+    <h2>Your entries</h2>
     <ul id="linkList" class="link-list<?= $hasDesc ? ' link-list--with-desc' : '' ?>" data-csrf="<?= e($csrf) ?>">
       <?php foreach ($links as $l): ?>
-        <li class="link-item" data-id="<?= (int)$l['id'] ?>">
+        <?php $isHeading = ($l['entry_type'] ?? 'link') === 'heading'; ?>
+        <li class="link-item<?= $isHeading ? ' link-item--heading' : '' ?>" data-id="<?= (int)$l['id'] ?>" data-type="<?= $isHeading ? 'heading' : 'link' ?>">
           <div class="link-item__row">
             <span class="drag" title="Drag to reorder">⋮⋮</span>
             <div class="link-item__fields">
-              <div class="grid">
-                <label class="link-item__label">Title<br><input class="title" type="text" value="<?= e($l['title']) ?>" maxlength="80" placeholder="Link title"></label>
-                <label class="link-item__label">URL<br><input class="url" type="url" value="<?= e($l['url']) ?>" placeholder="https://..."></label>
-              </div>
-              <?php if ($hasDesc): ?><label class="link-item__label">Description (optional)<br><input class="description" type="text" placeholder="Optional blurb (shows as card)" value="<?= e($l['description'] ?? '') ?>" maxlength="500"></label><?php endif; ?>
-              <div class="link-item__meta">
-                <label class="link-item__meta-label">Color <input class="color" type="color" value="<?= e($l['color_hex']) ?>" title="Button color"></label>
-                <label class="link-item__meta-label">Icon <select class="icon"><?php foreach ($icons as $slug => $path): ?><option value="<?= e($slug) ?>" <?= $slug === ($l['icon_slug'] ?? 'link') ? 'selected' : '' ?>><?= e($slug) ?></option><?php endforeach; ?></select></label>
-                <button type="button" class="save">Save</button>
-                <button type="button" class="delete danger">Delete</button>
-              </div>
+              <?php if ($isHeading): ?>
+                <label class="link-item__label">Heading<br><input class="title" type="text" value="<?= e($l['title']) ?>" maxlength="80" placeholder="Section title"></label>
+                <div class="link-item__meta">
+                  <button type="button" class="save">Save</button>
+                  <button type="button" class="delete danger">Delete</button>
+                </div>
+              <?php else: ?>
+                <div class="grid">
+                  <label class="link-item__label">Title<br><input class="title" type="text" value="<?= e($l['title']) ?>" maxlength="80" placeholder="Link title"></label>
+                  <label class="link-item__label">URL<br><input class="url" type="url" value="<?= e($l['url']) ?>" placeholder="https://..."></label>
+                </div>
+                <?php if ($hasDesc): ?><label class="link-item__label">Description (optional)<br><input class="description" type="text" placeholder="Optional blurb (shows as card)" value="<?= e($l['description'] ?? '') ?>" maxlength="500"></label><?php endif; ?>
+                <div class="link-item__meta">
+                  <label class="link-item__meta-label">Color <input class="color" type="color" value="<?= e($l['color_hex']) ?>" title="Button color"></label>
+                  <label class="link-item__meta-label">Icon <select class="icon"><?php foreach ($icons as $slug => $path): ?><option value="<?= e($slug) ?>" <?= $slug === ($l['icon_slug'] ?? 'link') ? 'selected' : '' ?>><?= e($slug) ?></option><?php endforeach; ?></select></label>
+                  <button type="button" class="save">Save</button>
+                  <button type="button" class="delete danger">Delete</button>
+                </div>
+              <?php endif; ?>
             </div>
           </div>
         </li>
@@ -104,10 +124,21 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
   fd.append('action', 'create');
+  fd.append('entry_type', 'link');
   const res = await fetch('/admin/api/link_crud.php', { method: 'POST', body: fd });
   const json = await res.json();
   if (json && json.id) location.reload();
   else alert(json.error || 'Failed to add link');
+});
+document.getElementById('addHeadingForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  fd.append('action', 'create');
+  fd.append('entry_type', 'heading');
+  const res = await fetch('/admin/api/link_crud.php', { method: 'POST', body: fd });
+  const json = await res.json();
+  if (json && json.id) location.reload();
+  else alert(json.error || 'Failed to add heading');
 });
 list.addEventListener('click', async (e) => {
   const li = e.target.closest('.link-item');
@@ -118,16 +149,18 @@ list.addEventListener('click', async (e) => {
     fd.append('action', 'update');
     fd.append('id', li.dataset.id);
     fd.append('title', li.querySelector('.title').value);
-    fd.append('url', li.querySelector('.url').value);
-    var descEl = li.querySelector('.description');
-    if (descEl) fd.append('description', descEl.value.trim());
-    fd.append('color_hex', li.querySelector('.color').value);
-    fd.append('icon_slug', li.querySelector('.icon').value);
+    if (li.dataset.type === 'link') {
+      fd.append('url', li.querySelector('.url').value);
+      var descEl = li.querySelector('.description');
+      if (descEl) fd.append('description', descEl.value.trim());
+      fd.append('color_hex', li.querySelector('.color').value);
+      fd.append('icon_slug', li.querySelector('.icon').value);
+    }
     const res = await fetch('/admin/api/link_crud.php', {method: 'POST', body: fd});
     const json = await res.json();
     if (!json.ok) alert(json.error || 'Update failed');
   } else if (e.target.classList.contains('delete')) {
-    if (!confirm('Delete this link?')) return;
+    if (!confirm(li.dataset.type === 'heading' ? 'Delete this heading?' : 'Delete this link?')) return;
     const fd = new FormData();
     fd.append('_token', csrf);
     fd.append('action', 'delete');
